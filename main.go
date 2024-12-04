@@ -88,3 +88,16 @@ func githubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	loggedinHandler(w, r, githubData)
 }
 
+// Represents the response received from Github
+type githubAccessTokenResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	Scope       string `json:"scope"`
+}
+
+// Represents the request body
+type AccessTokenRequestBody struct {
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	Code         string `json:"code"`
+}
