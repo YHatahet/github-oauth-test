@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -40,3 +41,26 @@ func main() {
 	)
 }
 
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, `<a href="/login/github/">LOGIN</a>`)
+}
+
+func getGithubClientID() string {
+
+	githubClientID, exists := os.LookupEnv("CLIENT_ID")
+	if !exists {
+		log.Fatal("Github Client ID not defined in .env file")
+	}
+
+	return githubClientID
+}
+
+func getGithubClientSecret() string {
+
+	githubClientSecret, exists := os.LookupEnv("CLIENT_SECRET")
+	if !exists {
+		log.Fatal("Github Client ID not defined in .env file")
+	}
+
+	return githubClientSecret
+}
