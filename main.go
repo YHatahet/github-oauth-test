@@ -32,7 +32,7 @@ func main() {
 
 	// Route where the authenticated user is redirected to
 	http.HandleFunc("/loggedin", func(w http.ResponseWriter, r *http.Request) {
-		loggedinHandler(w, r, "")
+		loggedinHandler(w, "")
 	})
 
 	fmt.Println("[ UP ON PORT 3000 ]")
@@ -85,7 +85,7 @@ func githubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	githubData := getGithubData(githubAccessToken)
 
-	loggedinHandler(w, r, githubData)
+	loggedinHandler(w, githubData)
 }
 
 // Represents the response received from Github
@@ -174,4 +174,26 @@ func getGithubData(accessToken string) string {
 
 	// Convert byte slice to string and return
 	return string(respbody)
+}
+
+func loggedinHandler(w http.ResponseWriter, githubData string) {
+	if githubData == "" {
+		// Unauthorized users get an unauthorized message
+		fmt.Fprintf(w, "UNAUTHORIZED!")
+		return
+	}
+
+	// Set return type JSON
+	w.Header().Set("Content-type", "application/json")
+
+	// Prettifying the json
+	var prettyJSON bytes.Buffer
+	// json.indent is a library utility function to prettify JSON indentation
+	parserr := json.Indent(&prettyJSON, []byte(githubData), "", "\t")
+	if parserr != nil {
+		log.Panic("JSON parse error")
+	}
+
+	// Return the prettified JSON as a string
+	w.Write(prettyJSON.Bytes())
 }
