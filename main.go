@@ -64,3 +64,16 @@ func getGithubClientSecret() string {
 
 	return githubClientSecret
 }
+
+func githubLoginHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the environment variable
+	githubClientID := getGithubClientID()
+
+	// Create the dynamic redirect URL for login
+	redirectURL := fmt.Sprintf(
+		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",
+		githubClientID,
+		"http://localhost:3000/login/github/callback")
+
+	http.Redirect(w, r, redirectURL, 301)
+}
