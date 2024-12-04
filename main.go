@@ -101,3 +101,48 @@ type AccessTokenRequestBody struct {
 	ClientSecret string `json:"client_secret"`
 	Code         string `json:"code"`
 }
+
+func getGithubAccessToken(code string) string {
+
+	clientID := getGithubClientID()
+	clientSecret := getGithubClientSecret()
+
+	// Set us the request body as JSON
+
+	requestBody := AccessTokenRequestBody{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Code:         code,
+	}
+	// Marshal the request body into JSON
+	requestJSON, _ := json.Marshal(requestBody)
+
+	// POST request to set URL
+	req, reqerr := http.NewRequest(
+		"POST",
+		"https://github.com/login/oauth/access_token",
+		bytes.NewBuffer(requestJSON),
+	)
+	if reqerr != nil {
+		log.Panic("Request creation failed")
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// Get the response
+	resp, resperr := http.DefaultClient.Do(req)
+	if resperr != nil {
+		log.Panic("Request failed")
+	}
+
+	// Response body converted to stringified JSON
+	respbody, _ := io.ReadAll(resp.Body)
+
+	// Convert stringified JSON to a struct object of type githubAccessTokenResponse
+	var ghresp githubAccessTokenResponse
+	json.Unmarshal(respbody, &ghresp)
+
+	// Return the access token (as the rest of the
+	// details are relatively unnecessary for us)
+	return ghresp.AccessToken
+}
