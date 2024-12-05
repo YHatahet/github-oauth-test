@@ -57,7 +57,7 @@ func GetGithubAccessToken(code string) string {
 
 // GetGithubData fetches user data from GitHub
 func GetGithubData(accessToken string) string {
-	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
+	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
 	if err != nil {
 		log.Panic("Request creation failed")
 	}

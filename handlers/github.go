@@ -12,7 +12,7 @@ func GithubLoginHandler(w http.ResponseWriter, r *http.Request) {
 	clientID := utils.GetGithubClientID()
 	redirectURL := "http://localhost:3000/login/github/callback"
 
-	http.Redirect(w, r, "https://github.com/login/oauth/authorize?client_id="+clientID+"&redirect_uri="+redirectURL, http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://github.com/login/oauth/authorize?client_id="+clientID+"&redirect_uri="+redirectURL+"&scope=read:user,user:email", http.StatusMovedPermanently)
 }
 
 // GithubCallbackHandler handles the GitHub OAuth callback
