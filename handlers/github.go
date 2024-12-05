@@ -19,6 +19,9 @@ func GithubLoginHandler(w http.ResponseWriter, r *http.Request) {
 func GithubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	accessToken := services.GetGithubAccessToken(code)
-	githubData := services.GetGithubData(accessToken)
-	LoggedInHandler(w, githubData)
+	// githubData := services.GetGithubData(accessToken)
+	githubEmail := services.GetGithubEmail(accessToken)
+	// githubData.
+	LoggedInHandlerEmail(w, githubEmail)
+	// LoggedInHandler(w, githubEmail)
 }

@@ -3,12 +3,20 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
 
 	"github.com/yhatahet/github-oauth-test/utils"
 )
+
+type Email struct {
+	Email      *string `json:"email"`
+	Primary    *bool   `json:"primary"`
+	Verified   *bool   `json:"verified"`
+	Visibility *string `json:"visibility"`
+}
 
 // AccessTokenRequestBody represents the request body for GitHub access token
 type AccessTokenRequestBody struct {
@@ -57,7 +65,7 @@ func GetGithubAccessToken(code string) string {
 
 // GetGithubData fetches user data from GitHub
 func GetGithubData(accessToken string) string {
-	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 	if err != nil {
 		log.Panic("Request creation failed")
 	}
@@ -70,4 +78,44 @@ func GetGithubData(accessToken string) string {
 
 	respBody, _ := io.ReadAll(resp.Body)
 	return string(respBody)
+}
+
+// findValidEmail fetches the first non-empty primary email.
+func findValidEmail(emails_string string) (string, error) {
+	var emails []Email
+	json.Unmarshal([]byte(emails_string), &emails)
+	if len(emails) == 0 {
+		return "", errors.New("email list is empty")
+	}
+
+	for _, email := range emails {
+		// email is valid if it exists and is set as primary
+		if email.Email != nil && *email.Email != "" && email.Primary != nil && *email.Primary {
+			return *email.Email, nil
+		}
+	}
+	return "", errors.New("no valid email found")
+}
+
+func GetGithubEmail(accessToken string) string {
+	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+	if err != nil {
+		log.Panic("Request creation failed")
+	}
+	req.Header.Set("Authorization", "token "+accessToken)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Panic("Request failed")
+	}
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		log.Panicf("Request failed with status code %d", resp.StatusCode)
+	}
+	validEmail, err := findValidEmail(string(respBody))
+	if err != nil {
+		log.Panic(err)
+	}
+	return validEmail
 }
